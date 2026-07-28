@@ -23,6 +23,42 @@ export default function PageStyles({ stylesheets, inlineStyles }: PageStylesProp
           padding-top: 0 !important;
         }
 
+        img {
+          opacity: 1 !important;
+          animation: none !important;
+          -webkit-animation: none !important;
+        }
+
+        img.img-with-animation {
+          opacity: 1 !important;
+          animation: none !important;
+          -webkit-animation: none !important;
+          transform: none !important;
+          -webkit-transform: none !important;
+        }
+
+        img.img-with-animation[data-animation="fade-in"],
+        img.img-with-animation[data-animation="fade-in-from-left"],
+        img.img-with-animation[data-animation="fade-in-from-right"],
+        img.img-with-animation[data-animation="fade-in-from-bottom"] {
+          opacity: 1 !important;
+          animation: none !important;
+          -webkit-animation: none !important;
+          transform: none !important;
+          -webkit-transform: none !important;
+          transition: none !important;
+          -webkit-transition: none !important;
+        }
+
+        /* body { overflow:hidden } breaks native lazy-load; force paint */
+        .img-with-aniamtion-wrap,
+        .img-with-aniamtion-wrap .inner,
+        .img-with-aniamtion-wrap .hover-wrap,
+        .img-with-aniamtion-wrap .hover-wrap-inner {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+
         html body,
         html body *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.dashicons):not(.vc-composer-icon):not(
             [class*=" icon-"]
