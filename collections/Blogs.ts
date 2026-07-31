@@ -111,7 +111,7 @@ export const Blogs: CollectionConfig = {
         description:
           "Direct image URL for the Insights card and full blog page. Used when set; otherwise the uploaded Featured Image is used.",
       },
-      validate: (value, { data }) => {
+      validate: (value: unknown, { data }: { data?: Record<string, unknown> }) => {
         const hasUrl = typeof value === "string" && value.trim().length > 0;
         const hasUpload = Boolean(data?.featuredImage);
         if (!hasUrl && !hasUpload) {
