@@ -4,3 +4,10 @@ out
 .DS_Store
 __MACOSX
 *.log
+.env
+.env.local
+.env*.local
+public/media
+media
+payload-types.ts
+
