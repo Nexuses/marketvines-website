@@ -5,6 +5,11 @@ import { useEffect } from "react";
 function toLocalImageSrc(url: string): string | null {
   if (!url || url.startsWith("data:") || url.startsWith("/images/")) return null;
 
+  // process-html accidentally prefixed absolute URLs with "/"
+  if (url.startsWith("/https://") || url.startsWith("/http://")) {
+    return url.slice(1);
+  }
+
   const i0 = url.match(/i0\.wp\.com\/marketvines\.com\/(?:wp-content\/uploads|images\/wp-content)\/([^?&#]+)/i);
   if (i0) return `/images/wp-content/${decodeURIComponent(i0[1])}`;
 
@@ -17,12 +22,18 @@ function toLocalImageSrc(url: string): string | null {
   return null;
 }
 
+function fixBrokenAbsoluteUrl(url: string): string {
+  if (url.startsWith("/https://") || url.startsWith("/http://")) return url.slice(1);
+  return url;
+}
+
 function resolveSrcCandidate(img: HTMLImageElement): string | null {
   const attrs = ["src", "data-src", "data-lazy-src", "data-original", "data-bg"];
   for (const attr of attrs) {
     const val = img.getAttribute(attr);
     if (val && !val.startsWith("data:")) {
-      return toLocalImageSrc(val) || (val.startsWith("/") ? val : null) || val;
+      const cleaned = fixBrokenAbsoluteUrl(val);
+      return toLocalImageSrc(cleaned) || (cleaned.startsWith("/") ? cleaned : null) || cleaned;
     }
   }
   return null;
@@ -44,19 +55,27 @@ function fixImage(img: HTMLImageElement) {
     img.getAttribute("srcset") ||
     img.getAttribute("data-srcset") ||
     img.getAttribute("data-lazy-srcset");
-  if (srcset && (srcset.includes("i0.wp.com") || srcset.includes("marketvines.com/wp-content") || srcset.includes("/images/"))) {
-    const fixed = srcset
-      .split(",")
-      .map((part) => {
-        const pieces = part.trim().split(/\s+/);
-        const local = toLocalImageSrc(pieces[0]);
-        if (local) return pieces.length > 1 ? `${local} ${pieces.slice(1).join(" ")}` : local;
-        return part.trim();
-      })
-      .join(", ");
-    img.srcset = fixed;
-    img.removeAttribute("data-srcset");
-    img.removeAttribute("data-lazy-srcset");
+  if (srcset) {
+    const needsFix =
+      srcset.includes("/https://") ||
+      srcset.includes("/http://") ||
+      srcset.includes("i0.wp.com") ||
+      srcset.includes("marketvines.com/wp-content") ||
+      srcset.includes("/images/");
+    if (needsFix) {
+      const fixed = srcset
+        .split(",")
+        .map((part) => {
+          const pieces = part.trim().split(/\s+/);
+          const cleaned = fixBrokenAbsoluteUrl(pieces[0]);
+          const local = toLocalImageSrc(cleaned) || cleaned;
+          return pieces.length > 1 ? `${local} ${pieces.slice(1).join(" ")}` : local;
+        })
+        .join(", ");
+      img.srcset = fixed;
+      img.removeAttribute("data-srcset");
+      img.removeAttribute("data-lazy-srcset");
+    }
   }
 
   img.style.opacity = "1";

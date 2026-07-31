@@ -79,8 +79,12 @@ const STRIP_SCRIPT_PATTERNS = [
 
 function normalizeAssetPath(url) {
   if (!url) return url;
+  // Keep absolute external URLs (e.g. Gravatar) intact
+  if (/^https?:\/\//i.test(url) || url.startsWith("//")) {
+    if (url.startsWith("//")) return `https:${url}`;
+    return url;
+  }
   let u = url.split("?")[0];
-  if (u.startsWith("//")) u = `https:${u}`;
   if (u.startsWith(BASE_URL)) u = u.slice(BASE_URL.length);
   if (!u.startsWith("/")) u = `/${u}`;
 
@@ -154,7 +158,14 @@ function rewriteHtml(html) {
   out = out.replace(/srcset=(["'])([^"']+)\1/gi, (match, quote, val) => {
     const parts = val.split(",").map((part) => {
       const pieces = part.trim().split(/\s+/);
-      const local = rewriteImageUrl(pieces[0]) || normalizeAssetPath(pieces[0]);
+      const url = pieces[0];
+      // Never rewrite absolute external URLs through normalizeAssetPath
+      if (/^https?:\/\//i.test(url) || url.startsWith("//")) {
+        const abs = url.startsWith("//") ? `https:${url}` : url;
+        const descriptor = pieces.slice(1).join(" ");
+        return descriptor ? `${abs} ${descriptor}` : abs;
+      }
+      const local = rewriteImageUrl(url) || normalizeAssetPath(url);
       const descriptor = pieces.slice(1).join(" ");
       return descriptor ? `${local} ${descriptor}` : local;
     });

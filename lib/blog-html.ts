@@ -205,7 +205,9 @@ export function buildCmsBlogPageHtml(
   // --- Author bio ---
   const authorBio = root.find("#author-bio");
   if (authorBio.length) {
-    authorBio.find("img.avatar").attr("src", avatar).attr("alt", blog.author);
+    const bioImg = authorBio.find("img.avatar");
+    bioImg.attr("src", avatar).attr("alt", blog.author);
+    bioImg.attr("srcset", `${avatar} 2x`);
     authorBio.find(".nectar-author-info-title a").text(blog.author);
   }
 
