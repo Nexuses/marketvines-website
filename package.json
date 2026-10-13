@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "^3.86.0",
-    "@payloadcms/next": "^3.86.0",
+    "@payloadcms/next": "^3.88.0",
     "@payloadcms/richtext-lexical": "^3.86.0",
     "cheerio": "^1.2.0",
     "graphql": "^16.14.2",
